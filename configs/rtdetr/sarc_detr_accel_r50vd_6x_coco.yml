@@ -1,0 +1,35 @@
+_BASE_: [
+  '../datasets/coco_detection.yml',
+  '../runtime.yml',
+  '_base_/optimizer_6x.yml',
+  '_base_/rtdetr_r50vd.yml',
+  '_base_/rtdetr_reader.yml',
+]
+
+weights: output/sarc_detr_accel_r50vd_6x_coco/model_final
+find_unused_parameters: True
+log_iter: 200
+
+DETR:
+  backbone: ResNet
+  neck: SARCDETRAccelHybridEncoder
+  transformer: RTDETRTransformer
+  detr_head: DINOHead
+  post_process: DETRPostProcess
+
+SARCDETRAccelHybridEncoder:
+  hidden_dim: 256
+  use_encoder_idx: [2]
+  num_encoder_layers: 1
+  encoder_layer:
+    name: SARCDETRTransformerLayer
+    d_model: 256
+    nhead: 8
+    dim_feedforward: 1024
+    dropout: 0.
+    activation: 'gelu'
+  expansion: 1.0
+  depth_mult: 1.0
+  rcc_span: 3
+  deploy: true
+  use_sac: true
